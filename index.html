@@ -21,7 +21,7 @@
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     html, body { width:100%; height:100%; overflow:hidden; background:var(--bg); font-family:'Poppins',sans-serif; color:var(--text); }
 
-    /* ── BACKGROUND ELEMENTS (Shared) ── */
+    /* ── BACKGROUND ELEMENTS ── */
     .bg-grid {
       position:fixed; inset:0; z-index:0; pointer-events:none;
       background-image:
@@ -148,19 +148,18 @@
     /* ── STAGE (Video Screen) ── */
     #stage {
       position:fixed; inset:0; z-index:200; 
-      background:var(--bg); /* Same as landing */
+      background:var(--bg);
       opacity:0; pointer-events:none; transition:opacity .6s ease;
       display:flex; align-items:center; justify-content:center;
     }
     #stage.on { opacity:1; pointer-events:all; }
 
-    /* Video Frame Styling */
     .video-frame {
       position:relative;
       width: 90%;
       max-width: 1000px;
       aspect-ratio: 16 / 9;
-      background: rgba(7, 21, 37, 0.7);
+      background: #000;
       border: 2px solid rgba(0, 212, 255, 0.3);
       border-radius: 20px;
       box-shadow: 0 0 50px rgba(0, 212, 255, 0.15);
@@ -169,15 +168,15 @@
       z-index: 20;
     }
 
+    /* YouTube Iframe specific */
     #mainVideo {
       width: 100%;
       height: 100%;
-      object-fit: cover;
       border-radius: 12px;
       display: block;
+      border: none;
     }
 
-    /* Top Right Controls */
     .video-controls-top {
       position: absolute;
       top: 25px;
@@ -188,7 +187,6 @@
       z-index: 100;
     }
 
-    /* عداد الوقت */
     .time-counter {
       font-family: monospace;
       font-size: 0.9rem;
@@ -221,7 +219,6 @@
       transform: translateY(-2px);
     }
 
-    /* شريط التقدم */
     .progress-bar-container {
       position: absolute;
       bottom: 25px;
@@ -238,7 +235,6 @@
       width: 0%;
       background: var(--accent);
       box-shadow: 0 0 10px var(--accent);
-      transition: width 0.1s linear;
     }
 
     #closeBtn {
@@ -315,7 +311,6 @@
     <div class="video-frame">
       <div class="video-controls-top">
         <div class="time-counter" id="timer">00:00 / 00:00</div>
-        
         <button class="control-btn" id="playBtn" onclick="togglePlay()" title="Play/Pause">
           <span id="playStatus">Ⅱ</span>
         </button>
@@ -323,7 +318,7 @@
 
       <button id="closeBtn" onclick="stopPresentation()" title="Stop & go back">✕</button>
 
-      <video id="mainVideo" src="0429.mp4" playsinline></video>
+      <div id="mainVideo"></div>
 
       <div class="progress-bar-container" id="progressContainer">
         <div class="progress-fill" id="progressFill"></div>
@@ -345,10 +340,67 @@
       }
     })();
 
-    /* ── Controls ── */
+    /* ── YouTube Player Logic ── */
+    var player;
+    var timerInterval;
+    
+    // تحميل مكتبة YouTube
+    var tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('mainVideo', {
+        height: '100%',
+        width: '100%',
+        videoId: 'tUC0PhJxH7A', // معرف الفيديو الخاص بك
+        playerVars: {
+          'autoplay': 0,
+          'controls': 0, // إخفاء عناصر تحكم يوتيوب الأصلية
+          'rel': 0,
+          'modestbranding': 1,
+          'playsinline': 1
+        },
+        events: {
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerStateChange(event) {
+      if (event.data == YT.PlayerState.PLAYING) {
+        playStatus.innerText = "Ⅱ";
+        startTracking();
+      } else {
+        playStatus.innerText = "▶";
+        stopTracking();
+      }
+    }
+
+    function startTracking() {
+      timerInterval = setInterval(() => {
+        if (player && player.getCurrentTime) {
+          const current = player.getCurrentTime();
+          const duration = player.getDuration();
+          
+          // تحديث العداد
+          timer.innerText = formatTime(current) + " / " + formatTime(duration);
+          
+          // تحديث الشريط
+          const percent = (current / duration) * 100;
+          progressFill.style.width = percent + "%";
+        }
+      }, 500);
+    }
+
+    function stopTracking() {
+      clearInterval(timerInterval);
+    }
+
+    /* ── UI Controls ── */
     const landing = document.getElementById('landing');
     const stage   = document.getElementById('stage');
-    const video   = document.getElementById('mainVideo');
     const playStatus = document.getElementById('playStatus');
     const timer = document.getElementById('timer');
     const progressFill = document.getElementById('progressFill');
@@ -359,59 +411,40 @@
       setTimeout(() => {
         landing.style.display = 'none';
         stage.classList.add('on');
-        video.currentTime = 0;
-        playStatus.innerText = "Ⅱ"; 
-        const p = video.play();
-        if(p && p.catch) p.catch(() => {});
+        player.playVideo();
       }, 800);
     }
 
     function stopPresentation() {
-      video.pause();
-      video.currentTime = 0;
+      player.pauseVideo();
+      player.seekTo(0);
       stage.classList.remove('on');
       landing.style.display = '';
       requestAnimationFrame(() => landing.classList.remove('exit'));
     }
 
     function togglePlay() {
-      if (video.paused) {
-        video.play();
-        playStatus.innerText = "Ⅱ";
+      const state = player.getPlayerState();
+      if (state == YT.PlayerState.PLAYING) {
+        player.pauseVideo();
       } else {
-        video.pause();
-        playStatus.innerText = "▶";
+        player.playVideo();
       }
     }
 
-    // تنسيق الوقت
     function formatTime(seconds) {
       let m = Math.floor(seconds / 60);
       let s = Math.floor(seconds % 60);
       return (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
     }
 
-    // تحديث الشريط والعداد
-    video.addEventListener('timeupdate', () => {
-      // تحديث الشريط
-      const percent = (video.currentTime / video.duration) * 100;
-      progressFill.style.width = percent + "%";
-      
-      // تحديث العداد
-      timer.innerText = formatTime(video.currentTime) + " / " + formatTime(video.duration || 0);
-    });
-
-    // التحكم في التقديم عبر الضغط على الشريط
     progressContainer.addEventListener('click', (e) => {
       const rect = progressContainer.getBoundingClientRect();
       const pos = (e.clientX - rect.left) / rect.width;
-      video.currentTime = pos * video.duration;
+      const newTime = pos * player.getDuration();
+      player.seekTo(newTime, true);
     });
 
-    video.onpause = () => playStatus.innerText = "▶";
-    video.onplay  = () => playStatus.innerText = "Ⅱ";
-
   </script>
-  <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
