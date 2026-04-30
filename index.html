@@ -145,113 +145,125 @@
       to   { opacity:1; transform:translateY(0); }
     }
 
-    /* ── STAGE (Video Screen) ── */
+    /* ══════════════════════════════════════
+       STAGE — improved video screen
+    ══════════════════════════════════════ */
     #stage {
-      position:fixed; inset:0; z-index:200; 
-      background:var(--bg);
+      position:fixed; inset:0; z-index:200;
+      background: radial-gradient(ellipse at 30% 20%, rgba(0,60,100,.35) 0%, var(--bg) 60%);
       opacity:0; pointer-events:none; transition:opacity .6s ease;
-      display:flex; align-items:center; justify-content:center;
+      display:flex; flex-direction:column;
+      align-items:center; justify-content:center;
+      gap: 1.4rem;
+      padding: 1.5rem;
     }
     #stage.on { opacity:1; pointer-events:all; }
 
-    .video-frame {
-      position:relative;
-      width: 90%;
-      max-width: 1000px;
-      aspect-ratio: 16 / 9;
-      background: #000;
-      border: 2px solid rgba(0, 212, 255, 0.3);
-      border-radius: 20px;
-      box-shadow: 0 0 50px rgba(0, 212, 255, 0.15);
-      padding: 12px;
-      backdrop-filter: blur(15px);
-      z-index: 20;
+    /* Top bar: title + close */
+    .stage-topbar {
+      width: 100%;
+      max-width: 1020px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+    }
+    .stage-title {
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    .stage-title::before {
+      content:'';
+      display:inline-block;
+      width:6px; height:6px;
+      border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 8px var(--accent);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    #closeBtn {
+      display: flex; align-items: center; gap: .5rem;
+      padding: .45rem 1.1rem;
+      border-radius: 8px;
+      border: 1px solid rgba(220,60,60,.45);
+      background: rgba(220,60,60,.08);
+      backdrop-filter: blur(10px);
+      color: #f88; font-family:'Poppins',sans-serif;
+      font-size: .75rem; font-weight:600; letter-spacing:.1em;
+      cursor:pointer; transition:all .25s ease;
+      text-transform: uppercase;
+    }
+    #closeBtn:hover {
+      background: rgba(220,50,50,.3);
+      border-color: rgba(220,50,50,.7);
+      box-shadow: 0 0 16px rgba(220,50,50,.35);
+      color: #fff;
     }
 
-    /* YouTube Iframe specific */
+    /* Video wrapper */
+    .video-frame {
+      position:relative;
+      width: 100%;
+      max-width: 1020px;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 16px;
+      box-shadow:
+        0 0 0 1px rgba(0,212,255,.18),
+        0 0 60px rgba(0,212,255,.12),
+        0 30px 80px rgba(0,0,0,.6);
+      overflow: hidden;
+    }
+
     #mainVideo {
       width: 100%;
       height: 100%;
-      border-radius: 12px;
       display: block;
       border: none;
+      border-radius: 12px;
+      background: #000;
     }
 
-    .video-controls-top {
-      position: absolute;
-      top: 25px;
-      right: 25px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      z-index: 100;
-    }
-
-    .time-counter {
-      font-family: monospace;
-      font-size: 0.9rem;
-      color: var(--accent);
-      background: rgba(4, 13, 24, 0.8);
-      padding: 4px 10px;
-      border-radius: 6px;
-      border: 1px solid rgba(0, 212, 255, 0.2);
-    }
-
-    .control-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      border: 1px solid rgba(0, 212, 255, 0.4);
-      background: rgba(4, 13, 24, 0.85);
+    .ctrl-btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .4rem .9rem;
+      border-radius: 8px;
+      border: 1px solid rgba(0,212,255,.3);
+      background: rgba(4,13,24,.75);
       color: var(--accent);
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      font-size: 1.1rem;
+      font-family: 'Poppins', sans-serif;
+      font-size: .72rem; font-weight: 600; letter-spacing: .08em;
+      transition: all .22s ease;
     }
-
-    .control-btn:hover {
+    .ctrl-btn:hover {
       background: var(--accent);
       color: var(--bg);
-      box-shadow: 0 0 15px var(--accent-glow);
-      transform: translateY(-2px);
+      box-shadow: 0 0 14px var(--accent-glow);
     }
 
-    .progress-bar-container {
-      position: absolute;
-      bottom: 25px;
-      left: 25px;
-      right: 25px;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      cursor: pointer;
-      overflow: hidden;
+    /* bottom info bar */
+    .stage-infobar {
+      width: 100%;
+      max-width: 1020px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
     }
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--accent);
-      box-shadow: 0 0 10px var(--accent);
+    .info-chip {
+      font-size: .68rem;
+      letter-spacing: .1em;
+      color: var(--text-dim);
+      text-transform: uppercase;
     }
-
-    #closeBtn {
-      position:absolute; top:-60px; left:50%; transform:translateX(-50%);
-      width:44px; height:44px; border-radius:50%;
-      border:1.5px solid rgba(255,255,255,.3);
-      background:rgba(255,255,255,.08);
-      backdrop-filter:blur(14px);
-      color:#fff; font-size:1.1rem; cursor:pointer;
-      display:flex; align-items:center; justify-content:center;
-      transition:all .25s ease;
-    }
-    #closeBtn:hover {
-      background:rgba(220,50,50,.35);
-      border-color:rgba(220,50,50,.7);
-      box-shadow:0 0 16px rgba(220,50,50,.4);
-    }
+    .info-chip span { color: var(--text-mid); }
 
     .vignette {
       position:absolute; inset:0; z-index:10; pointer-events:none;
@@ -305,24 +317,31 @@
     </div>
   </div>
 
+  <!-- ══ STAGE ══ -->
   <div id="stage">
     <div class="bg-grid"></div>
-    
-    <div class="video-frame">
-      <div class="video-controls-top">
-        <div class="time-counter" id="timer">00:00 / 00:00</div>
-        <button class="control-btn" id="playBtn" onclick="togglePlay()" title="Play/Pause">
-          <span id="playStatus">Ⅱ</span>
-        </button>
-      </div>
 
-      <button id="closeBtn" onclick="stopPresentation()" title="Stop & go back">✕</button>
+    <!-- top bar -->
+    <div class="stage-topbar">
+      <div class="stage-title">Vasovagal Syncope · Presentation</div>
+      <button id="closeBtn" onclick="stopPresentation()">✕ &nbsp;Back to menu</button>
+    </div>
 
-      <div id="mainVideo"></div>
+    <!-- video -->
+    <div class="video-frame" id="videoFrame">
+      <iframe
+        id="mainVideo"
+        src="https://player.cloudinary.com/embed/?cloud_name=daulriouh&public_id=0429_cjmi8e"
+        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+        allowfullscreen
+        frameborder="0"
+      ></iframe>
+    </div>
 
-      <div class="progress-bar-container" id="progressContainer">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
+    <!-- bottom info -->
+    <div class="stage-infobar">
+      <span class="info-chip">Medical Education · <span>Cardiology Series</span></span>
+      <span class="info-chip">Hover the video to show controls</span>
     </div>
 
     <div class="vignette"></div>
@@ -340,111 +359,25 @@
       }
     })();
 
-    /* ── YouTube Player Logic ── */
-    var player;
-    var timerInterval;
-    
-    // تحميل مكتبة YouTube
-    var tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    var firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('mainVideo', {
-        height: '100%',
-        width: '100%',
-        videoId: 'tUC0PhJxH7A', // معرف الفيديو الخاص بك
-        playerVars: {
-          'autoplay': 0,
-          'controls': 0, // إخفاء عناصر تحكم يوتيوب الأصلية
-          'rel': 0,
-          'modestbranding': 1,
-          'playsinline': 1
-        },
-        events: {
-          'onStateChange': onPlayerStateChange
-        }
-      });
-    }
-
-    function onPlayerStateChange(event) {
-      if (event.data == YT.PlayerState.PLAYING) {
-        playStatus.innerText = "Ⅱ";
-        startTracking();
-      } else {
-        playStatus.innerText = "▶";
-        stopTracking();
-      }
-    }
-
-    function startTracking() {
-      timerInterval = setInterval(() => {
-        if (player && player.getCurrentTime) {
-          const current = player.getCurrentTime();
-          const duration = player.getDuration();
-          
-          // تحديث العداد
-          timer.innerText = formatTime(current) + " / " + formatTime(duration);
-          
-          // تحديث الشريط
-          const percent = (current / duration) * 100;
-          progressFill.style.width = percent + "%";
-        }
-      }, 500);
-    }
-
-    function stopTracking() {
-      clearInterval(timerInterval);
-    }
-
-    /* ── UI Controls ── */
     const landing = document.getElementById('landing');
     const stage   = document.getElementById('stage');
-    const playStatus = document.getElementById('playStatus');
-    const timer = document.getElementById('timer');
-    const progressFill = document.getElementById('progressFill');
-    const progressContainer = document.getElementById('progressContainer');
 
     function startPresentation() {
       landing.classList.add('exit');
       setTimeout(() => {
         landing.style.display = 'none';
         stage.classList.add('on');
-        player.playVideo();
       }, 800);
     }
 
     function stopPresentation() {
-      player.pauseVideo();
-      player.seekTo(0);
+      // pause by reloading src without autoplay
+      const iframe = document.getElementById('mainVideo');
+      iframe.src = iframe.src;
       stage.classList.remove('on');
       landing.style.display = '';
       requestAnimationFrame(() => landing.classList.remove('exit'));
     }
-
-    function togglePlay() {
-      const state = player.getPlayerState();
-      if (state == YT.PlayerState.PLAYING) {
-        player.pauseVideo();
-      } else {
-        player.playVideo();
-      }
-    }
-
-    function formatTime(seconds) {
-      let m = Math.floor(seconds / 60);
-      let s = Math.floor(seconds % 60);
-      return (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-    }
-
-    progressContainer.addEventListener('click', (e) => {
-      const rect = progressContainer.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      const newTime = pos * player.getDuration();
-      player.seekTo(newTime, true);
-    });
-
   </script>
 </body>
 </html>
